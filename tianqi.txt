@@ -1,0 +1,48 @@
+#!/bin/bash
+#edit by 董树才2018.10.30
+#天气查询
+########    初始显示  ######
+## 清除历史文件里的数据
+echo > city.weather.doc
+echo > city.air.doc
+echo  "Program starting..."
+echo  "请输入要查询的城市名字(汉字）: "
+#接收键盘输入的城市名字
+read cityname
+############################################################# 
+#Module 1, 从网站获取天气信息并显示
+#清屏
+clear
+echo "Getting the weather from webpage..." 
+#这是我自己在聚合申请的天气api，注意网址的格式
+url="http://v.juhe.cn/weather/index?format=2&dtype=json&cityname=$cityname&key=0ca49a223e6205fccc48ddcbf09be8b7" 
+#Module 2, 从网站获取空气质量
+#基本同上 
+air_url="http://web.juhe.cn:8080/environment/air/cityair?city=$cityname&key=0ee63e942437426d3c3bed011ec2c627" 
+#显示当前日期
+date_today=$(date +'%Y-%m-%d')
+#生成日志 
+logFile=$date_today.log
+#从这个网站下载文件到city.weather.doc 
+wget -O city.weather.doc  $url
+wget -O   city.air.doc    $air_url
+echo "Got the weather file from internet." 
+echo "Getting the weather information..." 
+#获取包含当前城市风向风力到moment.weather.doc
+echo -e "$cityname 此时:\n"
+#这里我是先打开生成的文件看了后，取了一个列数范围来显示，未做什么高明的格式化输出
+#等以后学的更深入再做优化
+#awk以空格为分隔符，显示city.weather.doc第一行的第n列，输出到终端。
+awk  -F ""  'NR==1{for(n=64;n<=142;n++)printf("%-1s",$n)}'  city.weather.doc 
+#获取今日天气情况并显示
+echo -e "今日天气情况:\n"
+#awk以空格为分隔符，显示city.weather.doc第一行的第n列，输出到终端。
+awk  -F ""  'NR==1{for(n=140;n<=190;n++)printf("%-1s",$n)}'  city.weather.doc
+echo -e "\n" 
+awk  -F ""  'NR==1{for(n=220;n<=360;n++)printf("%-1s",$n)}'  city.weather.doc 
+echo -e "\n"   
+#显示当前空气质量 
+echo -e "$cityname 实时空气质量为:\n "
+#同上
+awk  -F ""  'NR==1{for(n=93;n<=143;n++)printf("%-1s",$n)}'  city.air.doc
+echo -e "\n"
